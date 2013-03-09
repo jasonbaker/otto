@@ -49,4 +49,32 @@ public interface ThreadEnforcer {
     }
   };
 
+  /** A {@link ThreadEnforcer} that confines {@link Bus} methods to a specified thread. */
+  public static class SingleThreadEnforcer implements ThreadEnforcer {
+      /** The thread that is allowed to access the {@link Bus}. */
+      private final Thread requiredThread;
+
+      /**
+       * Create a {@link SingleThreadEnforcer} that checks for the given thread. 
+       *
+       * @param thread The thread that may access a {@link Bus}.
+       */
+      public SingleThreadEnforcer(Thread thread) {
+		 requiredThread = thread;
+	  }
+
+	  /**
+	   * Create a {@link SingleThreadEnforcer} that checks for the current thread.
+	   */
+	  public SingleThreadEnforcer() {
+		  this(Thread.currentThread());
+	  }
+
+	  @Override public final void enforce(Bus bus) {
+		  if (Thread.currentThread() != requiredThread) {
+			  throw new IllegalStateException("Event bus " + bus + " accessed from incorrect thread " + Thread.currentThread());
+		  }
+	  }
+  }
+
 }
